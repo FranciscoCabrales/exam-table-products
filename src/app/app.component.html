@@ -1,0 +1,140 @@
+<div class="container">
+  <header class="header">
+    <h1>{{ title }}</h1>
+  </header>
+
+  <main class="main-content">
+    <!-- Filter Section -->
+    <section class="filter-section">
+      <div class="filter-container">
+        <label for="filter">Filter by Name:</label>
+        <input 
+          id="filter"
+          type="text" 
+          [formControl]="filterControl" 
+          placeholder="Search products..."
+          class="filter-input">
+        <button 
+          type="button" 
+          (click)="clearFilter()" 
+          class="btn btn-secondary">
+          Clear
+        </button>
+      </div>
+    </section>
+
+    <!-- Actions Section -->
+    <section class="actions-section">
+      <button 
+        type="button" 
+        (click)="openAssignForm()" 
+        class="btn btn-primary">
+        Assign Category
+      </button>
+    </section>
+
+    <!-- Products Table -->
+    <section class="table-section">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>UPC</th>
+            <th>Category Name</th>
+            <th>Options</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of filteredProducts$ | async">
+            <td>{{ product.id }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.upc }}</td>
+            <td>
+              <span [class]="product.categoryId ? 'category-assigned' : 'category-unassigned'">
+                {{ product.categoryName }}
+              </span>
+            </td>
+            <td class="options-cell">
+              <button 
+                type="button" 
+                (click)="openAssignForm(product.id)" 
+                class="btn btn-sm btn-primary">
+                Assign
+              </button>
+              <button 
+                type="button" 
+                (click)="unassignCategory(product.id)" 
+                class="btn btn-sm btn-danger"
+                [disabled]="!product.categoryId">
+                Unassign
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Assign Category Form Modal -->
+    <div *ngIf="showAssignForm" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Assign Category</h2>
+          <button 
+            type="button" 
+            (click)="closeAssignForm()" 
+            class="btn-close">
+            ×
+          </button>
+        </div>
+        
+        <form [formGroup]="assignCategoryForm" (ngSubmit)="onAssignCategory()">
+          <div class="form-group">
+            <label for="productSelect">Product:</label>
+            <select 
+              id="productSelect"
+              formControlName="productId" 
+              class="form-control">
+              <option value="">Select a product</option>
+              <option 
+                *ngFor="let product of products$ | async" 
+                [value]="product.id">
+                {{ product.name }} (ID: {{ product.id }})
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="categorySelect">Category:</label>
+            <select 
+              id="categorySelect"
+              formControlName="categoryId" 
+              class="form-control">
+              <option value="">Select a category</option>
+              <option 
+                *ngFor="let category of categories$ | async" 
+                [value]="category.id">
+                {{ category.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button 
+              type="submit" 
+              [disabled]="!assignCategoryForm.valid"
+              class="btn btn-primary">
+              Assign Category
+            </button>
+            <button 
+              type="button" 
+              (click)="closeAssignForm()" 
+              class="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
